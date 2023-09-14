@@ -8,7 +8,7 @@ This project provides a mechanism to match patterns against triples using a give
 ### Pseudo Algorithm
 
 ```sql
-Function matchPattern(pattern, triple, context):
+ Function matchPattern(pattern, triple, context):
     For each patternPart in pattern:
         Get corresponding triplePart from triple
         Update context using matchPart(patternPart, triplePart, context)
@@ -17,25 +17,49 @@ Function matchPattern(pattern, triple, context):
 Function matchPart(patternPart, triplePart, context):
     If context is null:
         Return null
-    If patternPart is a variable:
-        Update context using matchVariable(patternPart, triplePart, context)
-    Else if patternPart equals triplePart:
+    If isVariable(patternPart):
+        Return matchVariable(patternPart, triplePart, context)
+    If patternPart equals triplePart:
         Return context
-    Else:
-        Return null
+    Return null
 
 Function isVariable(x):
     If x is a string and starts with '?':
         Return true
-    Else:
-        Return false
+    Return false
 
 Function matchVariable(variable, triplePart, context):
-    If variable is already bound in context:
-        Get the bound value from context
-        Update context using matchPart(bound value, triplePart, context)
-    Else:
-        Add variable to context with value as triplePart
-        Return updated context
+    If variable exists in context:
+        Get bound value from context
+        Return matchPart(bound value, triplePart, context)
+    Add variable to context with value as triplePart
+    Return updated context
+
+Function querySingle(pattern, db, context):
+    Initialize results as empty list
+    For each triple in db:
+        MatchedContext = matchPattern(pattern, triple, context)
+        If MatchedContext is not null:
+            Add MatchedContext to results
+    Return results
+
+Function queryWhere(patterns, db):
+    Initialize contexts as a list with an empty object
+    For each pattern in patterns:
+        Update contexts using querySingle(pattern, db, context)
+    Return contexts
+
+Function query(queryObj, db):
+    contexts = queryWhere(queryObj.where, db)
+    Return map of contexts using actualize(context, queryObj.find)
+
+Function actualize(context, find):
+    Initialize results as empty list
+    For each findPart in find:
+        If isVariable(findPart):
+            Add context value of findPart to results
+        Else:
+            Add findPart to results
+    Return results
 
 ```

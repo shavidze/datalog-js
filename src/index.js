@@ -1,3 +1,5 @@
+import exampeTriples from "./example-triples.js";
+
 /**
  * Matches a pattern against a triple using a given context.
  *
@@ -112,3 +114,14 @@ function acutalize(context, find) {
     return isVariable(findPart) ? context[findPart] : findPart;
   });
 }
+
+query(
+  {
+    find: ["?year"],
+    where: [
+      ["?id", "movie/title", "Alien"],
+      ["?id", "movie/year", "?year"],
+    ],
+  },
+  exampleTriples
+);

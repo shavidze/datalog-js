@@ -55,6 +55,14 @@ function matchVariable(variable, triplePart, context) {
   return { ...context, [variable]: triplePart };
 }
 
+/**
+ * Queries a single pattern against the database.
+ *
+ * @param {Array} pattern - The pattern to be queried.
+ * @param {Array} db - The database of triples.
+ * @param {Object} context - The current context.
+ * @returns {Array} - List of matched contexts.
+ */
 function querySingle(pattern, db, context) {
   return db
     .map((triple) => matchPattern(pattern, triple, context))

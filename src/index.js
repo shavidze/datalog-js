@@ -1,4 +1,4 @@
-import exampeTriples from "./example-triples.js";
+import exampleTriples from "./example-triples.js";
 
 /**
  * Matches a pattern against a triple using a given context.
@@ -109,19 +109,47 @@ function query({ find, where }, db) {
  * @returns {Array} - Actualized results.
  */
 
-function acutalize(context, find) {
+function actualize(context, find) {
   return find.map((findPart) => {
     return isVariable(findPart) ? context[findPart] : findPart;
   });
 }
 
-query(
-  {
-    find: ["?year"],
-    where: [
-      ["?id", "movie/title", "Alien"],
-      ["?id", "movie/year", "?year"],
-    ],
-  },
-  exampleTriples
+console.log(
+  query(
+    {
+      find: ["?year"],
+      where: [
+        ["?id", "movie/title", "Alien"],
+        ["?id", "movie/year", "?year"],
+      ],
+    },
+    exampleTriples
+  )
+);
+
+console.log(
+  query(
+    {
+      find: ["?attr", "?value"],
+      where: [[200, "?attr", "?value"]],
+    },
+    exampleTriples
+  )
+);
+
+console.log(
+  query(
+    {
+      find: ["?directorName", "?movieTitle"],
+      where: [
+        ["?arnoldId", "person/name", "Arnold Schwarzenegger"],
+        ["?movieId", "movie/cast", "?arnoldId"],
+        ["?movieId", "movie/title", "?movieTitle"],
+        ["?movieId", "movie/director", "?directorId"],
+        ["?directorId", "person/name", "?directorName"],
+      ],
+    },
+    exampleTriples
+  )
 );

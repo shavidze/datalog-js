@@ -54,3 +54,53 @@ function matchVariable(variable, triplePart, context) {
   }
   return { ...context, [variable]: triplePart };
 }
+
+function querySingle(pattern, db, context) {
+  return db
+    .map((triple) => matchPattern(pattern, triple, context))
+    .filter((x) => x);
+}
+
+/**
+ * Queries multiple patterns against the database.
+ *
+ * @param {Array} patterns - List of patterns to be queried.
+ * @param {Array} db - The database of triples.
+ * @returns {Array} - List of matched contexts.
+ */
+
+function queryWhere(patterns, db) {
+  return patterns.reduce(
+    (contexts, pattern) => {
+      return contexts.flatMap((context) => querySingle(pattern, db, context));
+    },
+    [{}]
+  );
+}
+
+/**
+ * Main query function that matches patterns and returns results.
+ *
+ * @param {Object} queryObj - Object containing 'find' and 'where' keys.
+ * @param {Array} db - The database of triples.
+ * @returns {Array} - List of results after querying.
+ */
+
+function query({ find, where }, db) {
+  const contexts = queryWhere(where, db);
+  return contexts.map((context) => actualize(context, find));
+}
+
+/**
+ * Replaces variables in the 'find' pattern with actual values from the context.
+ *
+ * @param {Object} context - The current context.
+ * @param {Array} find - The 'find' pattern.
+ * @returns {Array} - Actualized results.
+ */
+
+function acutalize(context, find) {
+  return find.map((findPart) => {
+    return isVariable(findPart) ? context[findPart] : findPart;
+  });
+}

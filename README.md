@@ -1,6 +1,13 @@
-## Pseudo Algorithm
 
+## Datalog-JS
 
+This project provides a mechanism to match patterns against triples using a given context, primarily used in semantic web applications. It efficiently handles variable bindings, ensuring accurate matches and updating the context with new bindings as necessary.
+
+---
+
+### Pseudo Algorithm
+
+```sql
 Function matchPattern(pattern, triple, context):
     For each patternPart in pattern:
         Get corresponding triplePart from triple
@@ -30,3 +37,4 @@ Function matchVariable(variable, triplePart, context):
     Else:
         Add variable to context with value as triplePart
         Return updated context
+```

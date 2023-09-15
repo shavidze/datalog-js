@@ -1,5 +1,5 @@
 // Matches a pattern against a triple using a given context.
-function matchPattern(pattern, triple, context) {
+export function matchPattern(pattern, triple, context) {
   // For each part of the pattern, match it against the corresponding part of the triple.
   // If any part doesn't match, the whole pattern doesn't match.
   return pattern.reduce((context, patternPart, idx) => {
@@ -27,7 +27,7 @@ function isVariable(x) {
 }
 
 // Matches a variable against a part of the triple.
-function matchVariable(variable, triplePart, context) {
+export function matchVariable(variable, triplePart, context) {
   // If the variable is already bound in the context, match its value against the triple part.
   if (context.hasOwnProperty(variable)) {
     const bound = context[variable];
@@ -38,7 +38,7 @@ function matchVariable(variable, triplePart, context) {
 }
 
 // Queries a single pattern against the database.
-function querySingle(pattern, db, context) {
+export function querySingle(pattern, db, context) {
   // Find all triples in the database that are relevant to the pattern.
   // For each relevant triple, match the pattern against the triple.
   // Return all contexts that resulted from successful matches.
@@ -48,7 +48,7 @@ function querySingle(pattern, db, context) {
 }
 
 // Queries multiple patterns against the database.
-function queryWhere(patterns, db) {
+export function queryWhere(patterns, db) {
   // For each pattern, query it against the database.
   // Combine the results of all queries.
   return patterns.reduce(
@@ -60,7 +60,7 @@ function queryWhere(patterns, db) {
 }
 
 // Main query function that matches patterns and returns results.
-function query({ find, where }, db) {
+export function query({ find, where }, db) {
   // Query the 'where' patterns against the database.
   // For each resulting context, replace variables in the 'find' pattern with their values from the context.
   const contexts = queryWhere(where, db);

@@ -1,5 +1,3 @@
-import exampleTriples from "./example-triples.js";
-
 // Matches a pattern against a triple using a given context.
 function matchPattern(pattern, triple, context) {
   // For each part of the pattern, match it against the corresponding part of the triple.
@@ -91,16 +89,6 @@ function relevantTriples(pattern, db) {
   return db.triples;
 }
 
-// Creates a database object from a list of triples.
-function createDB(triples) {
-  return {
-    triples,
-    entityIndex: indexBy(triples, 0),
-    attrIndex: indexBy(triples, 1),
-    valueIndex: indexBy(triples, 2),
-  };
-}
-
 // Creates an index of triples by a given part (0, 1, or 2).
 function indexBy(triples, idx) {
   return triples.reduce((index, triple) => {
@@ -111,42 +99,12 @@ function indexBy(triples, idx) {
   }, {});
 }
 
-// Sample queries
-console.log(
-  query(
-    {
-      find: ["?year"],
-      where: [
-        ["?id", "movie/title", "Alien"],
-        ["?id", "movie/year", "?year"],
-      ],
-    },
-    exampleTriples
-  )
-);
-
-console.log(
-  query(
-    {
-      find: ["?attr", "?value"],
-      where: [[200, "?attr", "?value"]],
-    },
-    exampleTriples
-  )
-);
-
-console.log(
-  query(
-    {
-      find: ["?directorName", "?movieTitle"],
-      where: [
-        ["?arnoldId", "person/name", "Arnold Schwarzenegger"],
-        ["?movieId", "movie/cast", "?arnoldId"],
-        ["?movieId", "movie/title", "?movieTitle"],
-        ["?movieId", "movie/director", "?directorId"],
-        ["?directorId", "person/name", "?directorName"],
-      ],
-    },
-    exampleTriples
-  )
-);
+// Creates a database object from a list of triples.
+export function createDB(triples) {
+  return {
+    triples,
+    entityIndex: indexBy(triples, 0),
+    attrIndex: indexBy(triples, 1),
+    valueIndex: indexBy(triples, 2),
+  };
+}

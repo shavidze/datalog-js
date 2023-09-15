@@ -9,10 +9,9 @@ This project provides a mechanism to match patterns against triples using a give
 
 ```sql
  Function matchPattern(pattern, triple, context):
-    For each patternPart in pattern:
-        Get corresponding triplePart from triple
+    For each patternPart and triplePart in pattern and triple together:
         Update context using matchPart(patternPart, triplePart, context)
-    Return updated context
+    Return context
 
 Function matchPart(patternPart, triplePart, context):
     If context is null:
@@ -32,16 +31,14 @@ Function matchVariable(variable, triplePart, context):
     If variable exists in context:
         Get bound value from context
         Return matchPart(bound value, triplePart, context)
-    Add variable to context with value as triplePart
-    Return updated context
+    Return updated context with variable bound to triplePart
 
 Function querySingle(pattern, db, context):
-    Initialize results as empty list
-    For each triple in db:
-        MatchedContext = matchPattern(pattern, triple, context)
-        If MatchedContext is not null:
-            Add MatchedContext to results
-    Return results
+    Get relevant triples for pattern from db
+    For each triple:
+        Match context using matchPattern(pattern, triple, context)
+    Filter out null contexts
+    Return matched contexts
 
 Function queryWhere(patterns, db):
     Initialize contexts as a list with an empty object
@@ -54,12 +51,33 @@ Function query(queryObj, db):
     Return map of contexts using actualize(context, queryObj.find)
 
 Function actualize(context, find):
-    Initialize results as empty list
     For each findPart in find:
         If isVariable(findPart):
-            Add context value of findPart to results
+            Replace findPart with context value of findPart
         Else:
-            Add findPart to results
-    Return results
+            Keep findPart as is
+    Return updated find
 
+Function relevantTriples(pattern, db):
+    If id is not a variable:
+        Return triples with matching id from db.entityIndex
+    If attribute is not a variable:
+        Return triples with matching attribute from db.attrIndex
+    If value is not a variable:
+        Return triples with matching value from db.valueIndex
+    Return all triples from db
+
+Function indexBy(triples, idx):
+    Initialize index as an empty object
+    For each triple in triples:
+        Get key from triple at position idx
+        Add triple to index under key
+    Return index
+
+Function createDB(triples):
+    Return object with:
+        triples
+        entityIndex created using indexBy(triples, 0)
+        attrIndex created using indexBy(triples, 1)
+        valueIndex created using indexBy(triples, 2)
 ```

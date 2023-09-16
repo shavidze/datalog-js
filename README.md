@@ -1,7 +1,7 @@
 
 ## Datalog-JS
 
-This project, inspired by the [Datalog.js blog](https://www.instantdb.com/essays/datalogjs), matches patterns against triples in semantic web contexts. It manages variable bindings efficiently, guarantees precise matches, and updates the context with new bindings as needed.
+This project is built on top of this blog [Datalog.js blog](https://www.instantdb.com/essays/datalogjs)
 
 ### Pseudo Algorithm
 

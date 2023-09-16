@@ -1,56 +1,76 @@
-// Matches a pattern against a triple using a given context.
+/**
+ * Matches a pattern against a triple using a given context.
+ * @param {Array} pattern - The pattern to match.
+ * @param {Array} triple - The triple to match against.
+ * @param {Object} context - The context for variable bindings.
+ * @returns {Object} - Updated context after matching.
+ */
 export function matchPattern(pattern, triple, context) {
-  // For each part of the pattern, match it against the corresponding part of the triple.
-  // If any part doesn't match, the whole pattern doesn't match.
   return pattern.reduce((context, patternPart, idx) => {
     const triplePart = triple[idx];
     return matchPart(patternPart, triplePart, context);
   }, context);
 }
 
-// Matches a part of the pattern against a part of the triple.
+/**
+ * Matches a part of the pattern against a part of the triple.
+ * @param {*} patternPart - Part of the pattern.
+ * @param {*} triplePart - Corresponding part of the triple.
+ * @param {Object} context - The context for variable bindings.
+ * @returns {Object|null} - Updated context or null if mismatch.
+ */
 function matchPart(patternPart, triplePart, context) {
-  // If the context is null, the match has already failed.
   if (!context) return null;
-  // If the pattern part is a variable, match it against the triple part.
   if (isVariable(patternPart)) {
     return matchVariable(patternPart, triplePart, context);
   }
-  // If the pattern part and the triple part are the same, return the context.
-  // Otherwise, return null to indicate a mismatch.
   return patternPart === triplePart ? context : null;
 }
 
-// Checks if a given value is a variable (starts with a '?').
+/**
+ * Checks if a given value is a variable (starts with a '?').
+ * @param {*} x - Value to check.
+ * @returns {boolean} - True if x is a variable, false otherwise.
+ */
 function isVariable(x) {
   return typeof x === "string" && x.startsWith("?");
 }
 
-// Matches a variable against a part of the triple.
+/**
+ * Matches a variable against a part of the triple.
+ * @param {string} variable - The variable to match.
+ * @param {*} triplePart - Part of the triple to match against.
+ * @param {Object} context - The context for variable bindings.
+ * @returns {Object} - Updated context after matching the variable.
+ */
 export function matchVariable(variable, triplePart, context) {
-  // If the variable is already bound in the context, match its value against the triple part.
   if (context.hasOwnProperty(variable)) {
     const bound = context[variable];
     return matchPart(bound, triplePart, context);
   }
-  // If the variable is not bound, bind it to the triple part and return the updated context.
   return { ...context, [variable]: triplePart };
 }
 
-// Queries a single pattern against the database.
+/**
+ * Queries a single pattern against the database.
+ * @param {Array} pattern - The pattern to query.
+ * @param {Object} db - The database to query against.
+ * @param {Object} context - The context for variable bindings.
+ * @returns {Array} - Array of contexts resulting from successful matches.
+ */
 export function querySingle(pattern, db, context) {
-  // Find all triples in the database that are relevant to the pattern.
-  // For each relevant triple, match the pattern against the triple.
-  // Return all contexts that resulted from successful matches.
   return relevantTriples(pattern, db)
     .map((triple) => matchPattern(pattern, triple, context))
     .filter((x) => x);
 }
 
-// Queries multiple patterns against the database.
+/**
+ * Queries multiple patterns against the database.
+ * @param {Array} patterns - Array of patterns to query.
+ * @param {Object} db - The database to query against.
+ * @returns {Array} - Combined results of all queries.
+ */
 export function queryWhere(patterns, db) {
-  // For each pattern, query it against the database.
-  // Combine the results of all queries.
   return patterns.reduce(
     (contexts, pattern) => {
       return contexts.flatMap((context) => querySingle(pattern, db, context));
@@ -59,22 +79,35 @@ export function queryWhere(patterns, db) {
   );
 }
 
-// Main query function that matches patterns and returns results.
+/**
+ * Main query function that matches patterns and returns results.
+ * @param {Object} queryObj - Object containing 'find' and 'where' patterns.
+ * @param {Object} db - The database to query against.
+ * @returns {Array} - Array of results after matching patterns.
+ */
 export function query({ find, where }, db) {
-  // Query the 'where' patterns against the database.
-  // For each resulting context, replace variables in the 'find' pattern with their values from the context.
   const contexts = queryWhere(where, db);
   return contexts.map((context) => actualize(context, find));
 }
 
-// Replaces variables in the 'find' pattern with actual values from the context.
+/**
+ * Replaces variables in the 'find' pattern with actual values from the context.
+ * @param {Object} context - The context for variable bindings.
+ * @param {Array} find - The 'find' pattern.
+ * @returns {Array} - Array with variables replaced by their actual values.
+ */
 function actualize(context, find) {
   return find.map((findPart) => {
     return isVariable(findPart) ? context[findPart] : findPart;
   });
 }
 
-// Returns all triples from the database that are relevant to a given pattern.
+/**
+ * Returns all triples from the database that are relevant to a given pattern.
+ * @param {Array} pattern - The pattern to check relevance for.
+ * @param {Object} db - The database to check against.
+ * @returns {Array} - Array of relevant triples.
+ */
 function relevantTriples(pattern, db) {
   const [id, attribute, value] = pattern;
   if (!isVariable(id)) {
@@ -89,7 +122,12 @@ function relevantTriples(pattern, db) {
   return db.triples;
 }
 
-// Creates an index of triples by a given part (0, 1, or 2).
+/**
+ * Creates an index of triples by a given part (0, 1, or 2).
+ * @param {Array} triples - Array of triples.
+ * @param {number} idx - Index (0, 1, or 2) to create the index by.
+ * @returns {Object} - Index of triples by the given part.
+ */
 function indexBy(triples, idx) {
   return triples.reduce((index, triple) => {
     const k = triple[idx];
@@ -99,7 +137,11 @@ function indexBy(triples, idx) {
   }, {});
 }
 
-// Creates a database object from a list of triples.
+/**
+ * Creates a database object from a list of triples.
+ * @param {Array} triples - Array of triples.
+ * @returns {Object} - Database object.
+ */
 export function createDB(triples) {
   return {
     triples,
